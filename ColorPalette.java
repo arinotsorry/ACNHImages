@@ -15,41 +15,67 @@ public class ColorPalette extends ArrayList{
             }
         }
     }
+    public ColorPalette(){}
 
     public void optimize(){
-        //(from, to)
-        int startingSize = colorPalette.size();
+        ArrayList<Integer> array = new ArrayList<>();
+        addNumbers(array);
+        int startingSize = array.size();
+        while(array.size() > 4) {
+            int index1 = 0;
+            int index2 = 1;
+            double minDistance = findDistance(array.get(index1), array.get(index2), 30);
 
-        int range = 1;
-        while(colorPalette.size() > 16) {
-            //System.out.println();
-            //System.out.println(colorPalette.size());
-            //System.out.println();
-            double minDistance = -1;
-            ColorObj from = colorPalette.get(0);
-            ColorObj to = colorPalette.get(0);
-            int size = colorPalette.size();
-            for (int i = 0; i < size; i++) {
-                for (int j = i; j < size - i; j++) {
-                    //return
-                    double distance = colorPalette.get(i).findDistanceTo(colorPalette.get(j));
-                    if (distance > minDistance) {
+            for (int i = 0; i < array.size(); i++) {
+                for (int j = i + 1; j < array.size(); j++) {
+                    double distance = findDistance(array.get(i), array.get(j), 30);
+                    if (distance < minDistance && i != j) {
+                        System.out.println("Changing minDistance to " + i + "\t" + j + "\t" + distance);
                         minDistance = distance;
-                        from = colorPalette.get(i);
-                        to = colorPalette.get(j);
-                        //System.out.println("Mindistance: " + minDistance + "\t" + from + "\t" + to);
+                        index1 = i;
+                        index2 = j;
                     }
                 }
             }
-            combineColors(from, to);
+            System.out.println("\nCombine " + array.get(index1) + " and " + array.get(index2));
+            System.out.println(array);
+            array.add(findNewColor(array.get(index1), array.get(index2), 30));
+            array.remove(Math.max(index1, index2));
+            array.remove(Math.min(index1, index2));
+            System.out.println(array);
         }
-        System.out.println("ColorPalette: ");
-        System.out.println(colorPalette);
 
     }
 
+    public void addNumbers(ArrayList<Integer> array){
+        array.add(14);
+        array.add(28);
+        array.add(2);
+        array.add(18);
+        array.add(17);
+        array.add(29);
+        array.add(28);
+        array.add(17);
+        array.add(21);
+        array.add(7);
+        array.add(25);
+        array.add(4);
+        array.add(9);
+        array.add(24);
+        array.add(8);
+        array.add(23);
+        array.add(5);
+        array.add(7);
+        array.add(23);
+        array.add(22);
+        array.add(4);
+        array.add(9);
+        array.add(12);
+        array.add(20);
+    }
+
     public void combineColors(ColorObj a, ColorObj b){
-        System.out.println("Combining colors!");
+        //System.out.println("Combining colors!");
         int hue = a.getHueIndex() + b.getHueIndex();
         int sat = a.getSatIndex() + b.getSatIndex();
         int lum = a.getLumIndex() + b.getLumIndex();
@@ -62,8 +88,8 @@ public class ColorPalette extends ArrayList{
         colorPalette.remove(a);
         colorPalette.remove(b);
         colorPalette.add(color);
-        System.out.println("Palette from combining:");
-        System.out.println(colorPalette);
+        //System.out.println("Palette from combining:");
+        //System.out.println(colorPalette);
     }
 
     public boolean has(ColorObj o) {
@@ -80,16 +106,37 @@ public class ColorPalette extends ArrayList{
         return false;
     }
 
-    public Color findRelative(ColorObj obj){
-        double minDistance = obj.findDistanceTo(colorPalette.get(0));
-        Color closestRelative = colorPalette.get(0).getColor();
-        for(ColorObj color : this.colorPalette){
-            double distance = obj.findDistanceTo(color);
-            if(distance < minDistance){
-                minDistance = distance;
-                closestRelative = color.getColor();
-            }
+    public Double findDistance(Integer int1, Integer int2, int cap){
+        int distToCap = cap-Math.max(int1, int2);
+        int otherDistToCap = Math.min(int1, int2);
+        //System.out.println("For " + int1 + " and " + int2 + ":");
+        //System.out.println("Distance subtracting: " + Math.abs(int1-int2));
+        //System.out.println("Distance wrapping: " + (distToCap+otherDistToCap));
+        //System.out.println();
+        double subtraction = Math.abs(int1-int2);
+        double wrapping = distToCap + otherDistToCap;
+        return Math.min(subtraction, wrapping);
+    }
+
+    public int findNewColor(Integer int1, Integer int2, int cap){
+        int distToCap = cap-Math.max(int1, int2);
+        int otherDistToCap = Math.min(int1, int2);
+        double subtraction = Math.abs(int1-int2);
+        double wrapping = distToCap + otherDistToCap;
+        if(subtraction < wrapping){
+            return (int1+int2)/2;
         }
-        return closestRelative;
+        else{
+            distToCap *= -1;
+            int calculatedDistance = (distToCap+otherDistToCap)/2;
+            // you get -1
+            if(calculatedDistance < 0)
+                return cap+calculatedDistance;
+            // you get 32
+            else if(calculatedDistance > cap-1)
+                return calculatedDistance-cap;
+            // you get 15
+            return calculatedDistance;
+        }
     }
 }
