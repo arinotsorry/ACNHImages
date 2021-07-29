@@ -56,7 +56,7 @@ public class ColorObj {
         this.green = color.getGreen();
         this.blue = color.getBlue();
         this.hslInitial = RGBtoHSB(this.red, this.green, this.blue, null);
-        roundValue();
+        this.hslRounded = new double[] {hueValues[h], satLumValues[s], satLumValues[l], h, s, l};
     }
 
     public static void populate(){
